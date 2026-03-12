@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
+function getApiBaseUrl() {
+    const configuredUrl = import.meta.env.VITE_API_BASE_URL;
+    if (configuredUrl) {
+        return configuredUrl;
+    }
+
+    return '';
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Create axios instance with default config
 const api = axios.create({
@@ -27,17 +36,17 @@ api.interceptors.request.use(
 // API functions
 export const authAPI = {
     register: async (username, email, password) => {
-        const response = await api.post('/register', { username, email, password });
+        const response = await api.post('/api/register', { username, email, password });
         return response.data;
     },
 
     login: async (username, password) => {
-        const response = await api.post('/login', { username, password });
+        const response = await api.post('/api/login', { username, password });
         return response.data;
     },
 
     getCurrentUser: async () => {
-        const response = await api.get('/me');
+        const response = await api.get('/api/me');
         return response.data;
     },
 };

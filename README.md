@@ -27,10 +27,10 @@ Proof of Concept aplikacji z autentykacją użytkowników wykorzystującej Docke
    ```
 
 3. **Dostęp do aplikacji**:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation (Swagger): http://localhost:8000/docs
-   - PostgreSQL: localhost:5432
+   - Frontend: http://localhost:3002
+   - Backend API: http://localhost:8002
+   - API Documentation (Swagger): http://localhost:8002/docs
+   - PostgreSQL: localhost:5434
 
 ## 🎯 Funkcjonalności
 
@@ -169,7 +169,7 @@ docker-compose ps
 ```
 
 **Problem**: Frontend nie łączy się z backendem
-- Sprawdź czy backend działa: http://localhost:8000/health
+- Sprawdź czy backend działa: http://localhost:8002/health
 - Sprawdź CORS configuration w `backend/main.py`
 
 **Problem**: Błędy bazy danych

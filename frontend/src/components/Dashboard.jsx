@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { authAPI, tokenManager } from '../api';
 import Sidebar from './Sidebar';
 import Calculator from './Calculator';
+import CompletedView from './CompletedView';
+import MockupTableView from './MockupTableView';
 import RangesView from './RangesView';
 import NutsView from './NutsView';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -134,6 +136,8 @@ function Dashboard() {
                 <Routes>
                     <Route path="/" element={<DashboardHome user={user} />} />
                     <Route path="/calculator" element={<Calculator />} />
+                    <Route path="/mockup-table" element={<MockupTableView />} />
+                    <Route path="/completed" element={<CompletedView />} />
                     <Route path="/ranges" element={<RangesView />} />
                     <Route path="/nuts" element={<NutsView />} />
                 </Routes>

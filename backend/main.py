@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr
 from datetime import timedelta
 from typing import Optional, List
 from decimal import Decimal
+import os
 
 from database import engine, get_db, Base
 from models import User, Range, Nut, ScrewLength
@@ -28,9 +29,20 @@ app = FastAPI(
 )
 
 # CORS middleware configuration
+default_origins = [
+    "http://localhost:3000",
+    "http://localhost:3002",
+    "http://localhost:5173",
+]
+configured_origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=list(dict.fromkeys(default_origins + configured_origins)),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -76,6 +88,7 @@ def read_root():
 
 
 @app.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@app.post("/api/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserRegister, db: Session = Depends(get_db)):
     """
     Register a new user.
@@ -112,6 +125,7 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
 
 
 @app.post("/login", response_model=Token)
+@app.post("/api/login", response_model=Token)
 def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     """
     Login endpoint - returns JWT token.
@@ -137,6 +151,7 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
 
 
 @app.get("/me", response_model=UserResponse)
+@app.get("/api/me", response_model=UserResponse)
 def read_users_me(current_user: User = Depends(get_current_user)):
     """
     Get current authenticated user information.
