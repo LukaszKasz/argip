@@ -14,6 +14,7 @@ function Sidebar() {
 
     const menuItems = [
         { path: '/dashboard/calculator', label: t('sidebar.calculator'), icon: '🧮' },
+        { path: '/dashboard/pricing', label: t('sidebar.pricing'), icon: '💰' },
         { path: '/dashboard/mockup-table', label: t('sidebar.mockupTable'), icon: '📋' },
         { path: '/dashboard/completed', label: t('sidebar.completed'), icon: '✅' },
         { path: '/dashboard', label: t('sidebar.dashboard'), icon: '📊' },

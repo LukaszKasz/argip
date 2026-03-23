@@ -32,6 +32,8 @@ function Calculator() {
     const [newLength, setNewLength] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
+    const marketPricePerKg = 546.00;
+    const marketPricePer100 = 19.40;
 
     useEffect(() => {
         fetchScrews();
@@ -270,6 +272,18 @@ function Calculator() {
                     <div className="flex justify-between items-center pt-2">
                         <span className="font-bold text-slate-800 text-base">{t('calculator.totalCost')}</span>
                         <span className="font-bold text-blue-700 text-lg">{calculatedTotalCost.toFixed(2)} PLN</span>
+                    </div>
+                    <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="space-y-3 text-sm text-slate-600">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span>{t('calculator.marketPricePerKg')}</span>
+                                <span className="font-semibold text-blue-600">{marketPricePerKg.toFixed(2)} PLN</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span>{t('calculator.marketPricePer100')}</span>
+                                <span className="font-semibold text-blue-600">{marketPricePer100.toFixed(2)} PLN</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

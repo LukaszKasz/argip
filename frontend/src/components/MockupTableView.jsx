@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-const mockupRows = [
+const coatingProductRows = [
     {
         type1: 'Śruba',
         type: 'Imbusowa',
@@ -9,23 +9,11 @@ const mockupRows = [
         coating: 'Ocynk płatkowy',
         diameter: 'M8',
         length: '40 mm',
+        pricePerKg: '18,40 PLN',
         weightPer1000: '12,4 kg',
         onRequest: 'tak',
         coatingService: 'tak',
         nylon: 'nie',
-    },
-    {
-        type1: 'Nakrętka',
-        type: 'Sześciokątna',
-        norm: 'DIN 934',
-        materialClass: '10 / stal',
-        coating: 'Ocynk galwaniczny',
-        diameter: 'M10',
-        length: '-',
-        weightPer1000: '7,8 kg',
-        onRequest: 'tak',
-        coatingService: 'tak',
-        nylon: 'tak',
     },
     {
         type1: 'Podkładka',
@@ -35,10 +23,56 @@ const mockupRows = [
         coating: 'Fosforan',
         diameter: '10',
         length: '-',
+        pricePerKg: '12,80 PLN',
         weightPer1000: '3,1 kg',
         onRequest: 'nie',
         coatingService: 'tak',
         nylon: 'nie',
+    },
+    {
+        type1: 'Śruba',
+        type: 'Sześciokątna',
+        norm: 'DIN 933',
+        materialClass: '10.9 / stal węglowa',
+        coating: 'Ocynk galwaniczny',
+        diameter: 'M10',
+        length: '30 mm',
+        pricePerKg: '21,60 PLN',
+        weightPer1000: '18,2 kg',
+        onRequest: 'tak',
+        coatingService: 'tak',
+        nylon: 'nie',
+    },
+];
+
+const preapplicationProductRows = [
+    {
+        type1: 'Śruba',
+        type: 'Imbusowa',
+        norm: 'ISO 4762',
+        materialClass: '8.8 / stal węglowa',
+        coating: 'Patch nylonowy',
+        diameter: 'M8',
+        length: '40 mm',
+        pricePer100: '19,40 PLN',
+        weightPer1000: '12,4 kg',
+        onRequest: 'tak',
+        coatingService: 'nie',
+        nylon: 'tak',
+    },
+    {
+        type1: 'Śruba',
+        type: 'Sześciokątna',
+        norm: 'DIN 933',
+        materialClass: '10.9 / stal węglowa',
+        coating: 'Klej mikrokapsułkowany',
+        diameter: 'M10',
+        length: '30 mm',
+        pricePer100: '24,80 PLN',
+        weightPer1000: '18,2 kg',
+        onRequest: 'tak',
+        coatingService: 'nie',
+        nylon: 'tak',
     },
     {
         type1: 'Wkręt',
@@ -48,6 +82,7 @@ const mockupRows = [
         coating: 'Bez powłoki',
         diameter: '4,8',
         length: '19 mm',
+        pricePer100: '15,60 PLN',
         weightPer1000: '5,6 kg',
         onRequest: 'tak',
         coatingService: 'nie',
@@ -163,7 +198,7 @@ const costRows = [
 function MockupTableView() {
     const { t } = useTranslation();
 
-    const columns = [
+    const coatingColumns = [
         { key: 'type1', label: t('mockupTable.type1') },
         { key: 'type', label: t('mockupTable.type') },
         { key: 'norm', label: t('mockupTable.norm') },
@@ -171,6 +206,21 @@ function MockupTableView() {
         { key: 'coating', label: t('mockupTable.coating') },
         { key: 'diameter', label: t('mockupTable.diameter') },
         { key: 'length', label: t('mockupTable.length') },
+        { key: 'pricePerKg', label: t('mockupTable.pricePerKg') },
+        { key: 'weightPer1000', label: t('mockupTable.weightPer1000') },
+        { key: 'onRequest', label: t('mockupTable.onRequest') },
+        { key: 'coatingService', label: t('mockupTable.coatingService') },
+        { key: 'nylon', label: t('mockupTable.nylon') },
+    ];
+    const preapplicationColumns = [
+        { key: 'type1', label: t('mockupTable.type1') },
+        { key: 'type', label: t('mockupTable.type') },
+        { key: 'norm', label: t('mockupTable.norm') },
+        { key: 'materialClass', label: t('mockupTable.materialClass') },
+        { key: 'coating', label: t('mockupTable.coating') },
+        { key: 'diameter', label: t('mockupTable.diameter') },
+        { key: 'length', label: t('mockupTable.length') },
+        { key: 'pricePer100', label: t('mockupTable.pricePer100') },
         { key: 'weightPer1000', label: t('mockupTable.weightPer1000') },
         { key: 'onRequest', label: t('mockupTable.onRequest') },
         { key: 'coatingService', label: t('mockupTable.coatingService') },
@@ -217,10 +267,11 @@ function MockupTableView() {
                 </div>
 
                 <div className="card overflow-x-auto">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-4">{t('mockupTable.coatingProductsTitle')}</h2>
                     <table className="w-full min-w-[1400px]">
                         <thead>
                             <tr className="border-b border-slate-200">
-                                {columns.map((column) => (
+                                {coatingColumns.map((column) => (
                                     <th key={column.key} className="text-left py-3 px-4 font-semibold text-slate-700 whitespace-nowrap">
                                         {column.label}
                                     </th>
@@ -228,9 +279,35 @@ function MockupTableView() {
                             </tr>
                         </thead>
                         <tbody>
-                            {mockupRows.map((row) => (
+                            {coatingProductRows.map((row) => (
                                 <tr key={`${row.type1}-${row.norm}-${row.diameter}`} className="border-b border-slate-100 hover:bg-slate-50">
-                                    {columns.map((column) => (
+                                    {coatingColumns.map((column) => (
+                                        <td key={column.key} className="py-4 px-4 text-slate-700 whitespace-nowrap">
+                                            {row[column.key]}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="card overflow-x-auto">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-4">{t('mockupTable.preapplicationProductsTitle')}</h2>
+                    <table className="w-full min-w-[1400px]">
+                        <thead>
+                            <tr className="border-b border-slate-200">
+                                {preapplicationColumns.map((column) => (
+                                    <th key={column.key} className="text-left py-3 px-4 font-semibold text-slate-700 whitespace-nowrap">
+                                        {column.label}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {preapplicationProductRows.map((row) => (
+                                <tr key={`${row.type1}-${row.norm}-${row.diameter}`} className="border-b border-slate-100 hover:bg-slate-50">
+                                    {preapplicationColumns.map((column) => (
                                         <td key={column.key} className="py-4 px-4 text-slate-700 whitespace-nowrap">
                                             {row[column.key]}
                                         </td>

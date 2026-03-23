@@ -8,6 +8,7 @@ import CompletedView from './CompletedView';
 import MockupTableView from './MockupTableView';
 import RangesView from './RangesView';
 import NutsView from './NutsView';
+import PricingView from './PricingView';
 import LanguageSwitcher from './LanguageSwitcher';
 
 function DashboardHome({ user }) {
@@ -136,6 +137,7 @@ function Dashboard() {
                 <Routes>
                     <Route path="/" element={<DashboardHome user={user} />} />
                     <Route path="/calculator" element={<Calculator />} />
+                    <Route path="/pricing" element={<PricingView />} />
                     <Route path="/mockup-table" element={<MockupTableView />} />
                     <Route path="/completed" element={<CompletedView />} />
                     <Route path="/ranges" element={<RangesView />} />
