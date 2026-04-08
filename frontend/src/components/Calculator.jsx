@@ -1,10 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { screwLengthsAPI } from '../api';
+
+const AVAILABLE_DIAMETERS = [5, 6, 8, 10];
+const AVAILABLE_LENGTHS = [10, 12, 15, 20, 25];
+const AVAILABLE_SCREWS = AVAILABLE_DIAMETERS.flatMap((srednica) =>
+    AVAILABLE_LENGTHS.map((dlugosc) => ({
+        id: `${srednica}-${dlugosc}`,
+        srednica,
+        dlugosc,
+    }))
+);
 
 function Calculator() {
     const { t } = useTranslation();
-    const [screws, setScrews] = useState([]);
+    const screws = AVAILABLE_SCREWS;
     const [selectedScrew, setSelectedScrew] = useState('');
     const [selectedDiameter, setSelectedDiameter] = useState('');
     const [quantity, setQuantity] = useState('');
@@ -27,72 +36,10 @@ function Calculator() {
         paintRate: 150,
     });
     const [margin, setMargin] = useState(20);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [newDiameter, setNewDiameter] = useState('');
-    const [newLength, setNewLength] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(true);
+    const [loading] = useState(false);
     const marketPricePerKg = 546.00;
     const marketPricePer100 = 19.40;
-
-    useEffect(() => {
-        fetchScrews();
-    }, []);
-
-    const fetchScrews = async () => {
-        try {
-            setLoading(true);
-            const data = await screwLengthsAPI.getAll();
-            setScrews(data);
-            setError('');
-        } catch (err) {
-            setError(t('calculator.errorFetch'));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleAddScrew = async (e) => {
-        e.preventDefault();
-        setError('');
-
-        if (!newDiameter || parseFloat(newDiameter) <= 0) {
-            setError(t('calculator.errorInvalidDiameter'));
-            return;
-        }
-
-        if (!newLength || parseFloat(newLength) <= 0) {
-            setError(t('calculator.errorInvalidLength'));
-            return;
-        }
-
-        try {
-            await screwLengthsAPI.create({
-                srednica: parseFloat(newDiameter),
-                dlugosc: parseFloat(newLength)
-            });
-            await fetchScrews();
-            setNewDiameter('');
-            setNewLength('');
-            setShowAddForm(false);
-        } catch (err) {
-            setError(err.response?.data?.detail || t('calculator.errorSave'));
-        }
-    };
-
-    const handleDeleteScrew = async (id) => {
-        if (!window.confirm(t('calculator.confirmDelete'))) return;
-
-        try {
-            await screwLengthsAPI.delete(id);
-            await fetchScrews();
-            if (selectedScrew === id.toString()) {
-                setSelectedScrew('');
-            }
-        } catch (err) {
-            setError(t('calculator.errorDelete'));
-        }
-    };
 
     const MACHINE_DEFAULTS = {
         machine1: {
@@ -141,6 +88,7 @@ function Calculator() {
     );
     const requiresNormSelection = productType === 'screw' && screwType === 'hexSocket';
     const canShowScrewSelection = productType === 'screw' && screwType === 'hexSocket' && Boolean(selectedNorm);
+    const selectedScrewData = screws.find((screw) => screw.id === selectedScrew) ?? null;
 
     useEffect(() => {
         if (machine && MACHINE_DEFAULTS[machine]) {
@@ -550,21 +498,12 @@ function Calculator() {
                         </div>
                     </div>
 
-                    <div className="flex justify-end">
-                        <button
-                            onClick={() => setShowAddForm(!showAddForm)}
-                            className="btn-primary whitespace-nowrap"
-                        >
-                            {showAddForm ? t('calculator.cancel') : t('calculator.addButton')}
-                        </button>
-                    </div>
-
                     {selectedScrew && (
                         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                             <p className="text-blue-800 mb-3">
                                 {t('calculator.selectedScrew')}:{' '}
                                 <strong>
-                                    ⌀{screws.find(s => s.id === parseInt(selectedScrew))?.srednica} mm × {screws.find(s => s.id === parseInt(selectedScrew))?.dlugosc} mm
+                                    ⌀{selectedScrewData?.srednica} mm × {selectedScrewData?.dlugosc} mm
                                 </strong>
                             </p>
                             <div className="flex flex-wrap items-end gap-4">
@@ -748,60 +687,6 @@ function Calculator() {
                         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
                             {t('calculator.productTypeInfo', { product: t(`calculator.product.${productType}`) })}
                         </div>
-                    </div>
-                )}
-
-                {showAddForm && (
-                    <div className="card mb-6">
-                        <h2 className="text-xl font-semibold text-slate-800 mb-4">
-                            {t('calculator.addNewScrew')}
-                        </h2>
-                        <form onSubmit={handleAddScrew} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    {t('calculator.diameterValue')} (mm)
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={newDiameter}
-                                    onChange={(e) => setNewDiameter(e.target.value)}
-                                    className="input-field"
-                                    placeholder={t('calculator.diameterPlaceholder')}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    {t('calculator.lengthValue')} (mm)
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={newLength}
-                                    onChange={(e) => setNewLength(e.target.value)}
-                                    className="input-field"
-                                    placeholder={t('calculator.lengthPlaceholder')}
-                                    required
-                                />
-                            </div>
-                            <div className="flex gap-3">
-                                <button type="submit" className="btn-primary">
-                                    {t('calculator.create')}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowAddForm(false);
-                                        setNewDiameter('');
-                                        setNewLength('');
-                                    }}
-                                    className="px-6 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
-                                >
-                                    {t('calculator.cancel')}
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 )}
 
