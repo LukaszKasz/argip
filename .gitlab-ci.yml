@@ -1,0 +1,82 @@
+stages:
+  - build
+  - deploy_test
+  - deploy_prod
+
+build:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - if: $CI_COMMIT_BRANCH == "test"
+      when: on_success
+    - when: never
+  trigger:
+    strategy: depend
+    include:
+      - component: $CI_SERVER_FQDN/advoxProjects/devops/ci-cd/build-image/bake@1.2.0
+        inputs:
+          rules:
+            - if: $CI_COMMIT_TAG
+              when: on_success
+            - if: $CI_COMMIT_BRANCH == "test"
+              when: on_success
+            - when: never
+
+deploy_test:
+  stage: deploy_test
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == "test"
+      when: on_success
+    - when: never
+  tags:
+    - docker-master.advox.internal
+  script:
+    - |
+      for service in app frontend; do
+        docker service update --force \
+          --image=registry.advox.pl:8443/argip/calculator/${service}:${CI_COMMIT_SHORT_SHA} \
+          argip-calculator-test_${service} || exit 1
+      done
+  after_script:
+    - |
+      if [ "$CI_JOB_STATUS" == "failed" ]; then
+        echo "⛔ Job failed. Fetching service logs and status..."
+        docker service ps --no-trunc argip-calculator-test_app
+        docker service logs --tail 100 argip-calculator-test_app
+        docker service ps --no-trunc argip-calculator-test_frontend
+        docker service logs --tail 100 argip-calculator-test_frontend
+      fi
+
+deploy_prod:
+  stage: deploy_prod
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+    - when: never
+  tags:
+    - argip
+    - production
+  script:
+    - docker pull registry.advox.pl:8443/argip/calculator/app:${CI_COMMIT_TAG}
+    - docker pull registry.advox.pl:8443/argip/calculator/frontend:${CI_COMMIT_TAG}
+
+deploy_prod_update_repository_and_deploy:
+  stage: deploy_prod
+  needs:
+    - deploy_prod
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - when: never
+  trigger:
+    strategy: depend
+    include:
+      - component: $CI_SERVER_FQDN/advoxProjects/devops/ci-cd/deploy/general/docker_compose_version_update@1.4.5
+        inputs:
+          skip_ci: "false"
+          repository: https://gitlab-ci-token:${CI_CD_CONFIGURATION_REPO_TOKEN}@gitlab.advox.centuria.pl/advoxProjects/argip/devops/calculator/dockerswarm/production.git
+          repository_file: docker-compose.yml
+          substitution_path: "x-app-image x-frontend-image"
