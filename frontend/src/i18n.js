@@ -345,7 +345,7 @@ const resources = {
             "sidebar.calculator": "Kalkulator",
             "sidebar.pricing": "Dodaj cennik",
             "sidebar.completed": "Zrealizowane",
-            "sidebar.mockupTable": "Tabela",
+            "sidebar.mockupTable": "Tabele",
             "sidebar.dashboard": "Panel",
             "sidebar.ranges": "Zakresy",
             "sidebar.nuts": "Nakrętki",
@@ -363,7 +363,7 @@ const resources = {
             "completed.salePrice": "Cena sprzedaży / 100 szt",
 
             // Mockup Table
-            "mockupTable.title": "Tabela mockup",
+            "mockupTable.title": "Tabele mockup",
             "mockupTable.subtitle": "Przykładowa matryca produktów z przykładowymi danymi.",
             "mockupTable.type1": "Typ 1",
             "mockupTable.type": "Typ",

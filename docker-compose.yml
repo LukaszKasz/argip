@@ -22,8 +22,9 @@ services:
   # FastAPI Backend
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
+      target: application
     container_name: argip-backend
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/argip_db
@@ -40,8 +41,12 @@ services:
   # React Frontend
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
+      target: frontend
+    environment:
+      APP_HOST: backend
+      APP_PORT: 8000
     container_name: argip-frontend
     ports:
       - "3002:80"

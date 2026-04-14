@@ -18,8 +18,6 @@ function Sidebar() {
         { path: '/dashboard/mockup-table', label: t('sidebar.mockupTable'), icon: '📋' },
         { path: '/dashboard/completed', label: t('sidebar.completed'), icon: '✅' },
         { path: '/dashboard', label: t('sidebar.dashboard'), icon: '📊' },
-        { path: '/dashboard/ranges', label: t('sidebar.ranges'), icon: '📏' },
-        { path: '/dashboard/nuts', label: t('sidebar.nuts'), icon: '🔩' },
     ];
 
     return (
