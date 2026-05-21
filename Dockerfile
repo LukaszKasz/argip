@@ -78,6 +78,7 @@ CMD ["/usr/bin/tini", "--", "/usr/local/bin/entrypoint.sh"]
 FROM node:18-alpine AS frontend-build
 
 ARG VITE_API_URL=""
+ARG VITE_APP_BASE_PATH=/
 
 WORKDIR /app
 
@@ -92,6 +93,7 @@ COPY ./frontend/ .
 
 # Set build-time env vars
 ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_APP_BASE_PATH=${VITE_APP_BASE_PATH}
 
 # Build the application
 RUN npm run build
@@ -101,13 +103,10 @@ RUN npm run build
 # ===========================
 FROM nginx:1.27-alpine AS frontend
 
-ENV APP_HOST=app
-ENV APP_PORT=8000
-ENV PORT=80
-ENV SERVER_NAME=_
+ENV APP_BASE_PATH=/argip
 
 # Copy nginx template (envsubst-compatible)
-COPY ./frontend/.dockerfiles/nginx/templates/default.conf /etc/nginx/templates/default.conf.template
+COPY ./frontend/nginx.conf /etc/nginx/templates/default.conf.template
 
 # Copy built assets from build stage
 COPY --from=frontend-build /app/dist /usr/share/nginx/html

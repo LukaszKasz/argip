@@ -6,6 +6,11 @@ function getApiBaseUrl() {
         return configuredUrl;
     }
 
+    const appBasePath = import.meta.env.VITE_APP_BASE_PATH;
+    if (appBasePath && appBasePath !== '/') {
+        return appBasePath.replace(/\/$/, '');
+    }
+
     return '';
 }
 

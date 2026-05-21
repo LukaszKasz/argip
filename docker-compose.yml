@@ -1,65 +1,69 @@
+name: argip
+
 services:
-  # PostgreSQL Database
   db:
     image: postgres:15-alpine
-    container_name: argip-db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: argip_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-argip_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5434:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-argip_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - argip-network
 
-  # FastAPI Backend
   backend:
     build:
       context: .
       dockerfile: Dockerfile
       target: application
-    container_name: argip-backend
+    restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/argip_db
-      SECRET_KEY: your-secret-key-change-in-production-please
-    ports:
-      - "8002:8000"
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/argip_db}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost,https://sprzedaz.advox.pl}
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - argip-network
-    restart: unless-stopped
+      argip-network:
+      proxy:
+        aliases:
+          - argip-backend
 
-  # React Frontend
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
       target: frontend
+      args:
+        VITE_APP_BASE_PATH: ${VITE_APP_BASE_PATH:-/argip/}
+        VITE_API_URL: ${VITE_API_URL:-}
+    restart: unless-stopped
     environment:
-      APP_HOST: backend
-      APP_PORT: 8000
-    container_name: argip-frontend
-    ports:
-      - "3002:80"
+      APP_BASE_PATH: ${APP_BASE_PATH:-/argip}
     depends_on:
       - backend
     networks:
-      - argip-network
-    restart: unless-stopped
+      argip-network:
+      proxy:
+        aliases:
+          - argip-frontend
 
 volumes:
   postgres_data:
+    name: argip_postgres_data
     driver: local
 
 networks:
   argip-network:
+    name: argip_network
     driver: bridge
+  proxy:
+    external: true

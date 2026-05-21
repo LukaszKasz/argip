@@ -4,13 +4,15 @@ import RegisterForm from './components/RegisterForm';
 import Dashboard from './components/Dashboard';
 import { tokenManager } from './api';
 
+const routerBasename = import.meta.env.VITE_APP_BASE_PATH || '/';
+
 function ProtectedRoute({ children }) {
     return tokenManager.isAuthenticated() ? children : <Navigate to="/login" />;
 }
 
 function App() {
     return (
-        <Router>
+        <Router basename={routerBasename}>
             <Routes>
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/login" element={<LoginForm />} />
