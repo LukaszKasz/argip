@@ -6,6 +6,7 @@ import Sidebar from './Sidebar';
 import Calculator from './Calculator';
 import CompletedView from './CompletedView';
 import MockupTableView from './MockupTableView';
+import PimcoreView from './PimcoreView';
 import RangesView from './RangesView';
 import NutsView from './NutsView';
 import PricingView from './PricingView';
@@ -137,6 +138,7 @@ function Dashboard() {
                 <Routes>
                     <Route path="/" element={<DashboardHome user={user} />} />
                     <Route path="/calculator" element={<Calculator />} />
+                    <Route path="/pimcore" element={<PimcoreView />} />
                     <Route path="/pricing" element={<PricingView />} />
                     <Route path="/mockup-table" element={<MockupTableView />} />
                     <Route path="/completed" element={<CompletedView />} />

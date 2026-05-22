@@ -147,4 +147,16 @@ export const screwLengthsAPI = {
     },
 };
 
+export const productAPI = {
+    getById: async (id) => {
+        const response = await api.get(`/api/product/get-by-id/${encodeURIComponent(id)}`);
+        return response.data;
+    },
+
+    getBySku: async (sku) => {
+        const response = await api.get(`/api/product/get-by-sku/${encodeURIComponent(sku)}`);
+        return response.data;
+    },
+};
+
 export default api;

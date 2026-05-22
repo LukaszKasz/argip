@@ -6,6 +6,8 @@ from pydantic import BaseModel, EmailStr
 from datetime import timedelta
 from typing import Optional, List
 from decimal import Decimal
+from urllib import error, parse, request
+import json
 import os
 
 from database import engine, get_db, Base
@@ -26,6 +28,12 @@ app = FastAPI(
     title="Argip Auth API",
     description="Authentication API for Argip POC",
     version="1.0.0"
+)
+
+PIMCORE_API_BASE_URL = os.getenv("PIMCORE_API_BASE_URL", "https://stage.pimcore.argip.advox.dev").rstrip("/")
+PIMCORE_BEARER_TOKEN = os.getenv(
+    "PIMCORE_BEARER_TOKEN",
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3Nzk0Mzc2MzksImV4cCI6MTc3OTQ0MTIzOSwicm9sZXMiOlsiUk9MRV9QSU1DT1JFX0FETUlOIl0sInVzZXJuYW1lIjoibHVrYXN6UmVzdCJ9.jXr_wVcbTzYSaTbTdqKDV64bU90ELfJUhDmYe1Wk-x6OfsU4KQ8S7I3Hk62j_UIqD1QNmTOYSxh8VCW93VPYD2tqf3E6vovQL6a1uCyluftIm4EBmzuEXMnVB9MxEkWu-Ernmnx91KTkT_ooRO9bVefj1I3sl-AxkQHSz_s7ZCEVmJS0_AKthCaEia_mExQTwbUgxIIhEwXZBB4gc7VcSxCQwQX5opTSEl8jsQnpdOXlIecm-ZeOD3XYiNN8DpUggJanvh4JFfXrSTa5Rt6XrdS4SRmUFQ2kKfDTrOx7MK3DFW_DXs2Tgf4s_vXp2DwM4IDZ5oImv1nGe8wvZdILwg",
 )
 
 # CORS middleware configuration
@@ -166,6 +174,48 @@ def health_check():
     Health check endpoint for Docker.
     """
     return {"status": "healthy"}
+
+
+def fetch_pimcore_product(path: str):
+    upstream_url = f"{PIMCORE_API_BASE_URL}{path}"
+    upstream_request = request.Request(
+        upstream_url,
+        headers={
+            "Accept": "application/json",
+            "Authorization": f"Bearer {PIMCORE_BEARER_TOKEN}",
+        },
+        method="GET",
+    )
+
+    try:
+        with request.urlopen(upstream_request, timeout=30) as response:
+            payload = response.read().decode("utf-8")
+            return json.loads(payload)
+    except error.HTTPError as exc:
+        payload = exc.read().decode("utf-8", errors="replace")
+        detail = payload or f"Pimcore request failed with status {exc.code}"
+
+        try:
+            parsed_payload = json.loads(payload)
+            detail = parsed_payload.get("detail") or parsed_payload.get("message") or parsed_payload
+        except json.JSONDecodeError:
+            pass
+
+        raise HTTPException(status_code=exc.code, detail=detail)
+    except error.URLError as exc:
+        raise HTTPException(status_code=502, detail=f"Pimcore upstream unavailable: {exc.reason}")
+
+
+@app.get("/product/get-by-id/{product_id}")
+@app.get("/api/product/get-by-id/{product_id}")
+def get_product_by_id(product_id: str):
+    return fetch_pimcore_product(f"/api/product/get-by-id/{parse.quote(product_id, safe='')}")
+
+
+@app.get("/product/get-by-sku/{sku}")
+@app.get("/api/product/get-by-sku/{sku}")
+def get_product_by_sku(sku: str):
+    return fetch_pimcore_product(f"/api/product/get-by-sku/{parse.quote(sku, safe='')}")
 
 
 # Pydantic models for Ranges
